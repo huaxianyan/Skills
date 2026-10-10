@@ -1,11 +1,11 @@
 ---
 name: android-modern-standards
-description: Android 现代开发规范。目标 SDK 跟进最新稳定版、平台新特性尽量接入（预测性返回、edge-to-edge、大屏可调整性）、界面优先用原生 Material You 组件、动效以 Pixel 实际表现为参照。新建或改造 Android 项目、提升 targetSdk、处理系统栏与返回手势、选界面组件、调转场动画时使用。触发语句：「升 targetSdk」「接入预测性返回」「支持 edge-to-edge」「Material You」「M3 Expressive」「这个转场不对」「动画跟 Pixel 不一样」「大屏适配」。
+description: Android 现代开发规范。目标 SDK 跟进最新稳定版、平台新特性尽量接入（预测性返回、edge-to-edge、大屏可调整性）、界面优先用原生 Material You 组件、动效参照指定的开源样板应用。新建或改造 Android 项目、提升 targetSdk、处理系统栏与返回手势、选界面组件、调转场动画时使用。触发语句：「升 targetSdk」「接入预测性返回」「支持 edge-to-edge」「Material You」「M3 Expressive」「这个转场不对」「动画不一致」「大屏适配」。
 ---
 
 # Android 现代开发规范
 
-三条主线：平台新特性尽量接入、界面走原生 Material、动效以 Pixel 实际表现为参照。
+三条主线：平台新特性尽量接入、界面走原生 Material、动效参照项目指定的样板应用。
 
 版本相关的数字都标了核对日期。Android 一年一个大版本，数字会过时，判据和做法比较稳定。动手前先按文中的链接核对当前版本。
 
@@ -106,6 +106,7 @@ Manifest 里接入的 Activity 名单，与成品门禁脚本的检查清单，�
 - `1.4.0` 内部已含 Expressive 的部分实现，但 `MaterialExpressiveTheme` 当时仍是 `internal`，不能当公开 API 调。
 - Beta 线已公开 `MaterialExpressiveTheme`、`MotionScheme.expressive()`、`ButtonGroup`、`MediumFlexibleTopAppBar` 等。
 - 其中一部分仍标 `@ExperimentalMaterial3ExpressiveApi`，Alpha 期间 API 与默认值仍会变。**不要把 alpha 当长期基线**，可以在隔离分支做原型。
+- **内部 API 不得用反射、可见性抑制或自绘控件绕过**。编译不过就说明它不是公开接口，绕过等于把一个随时会变的内部实现绑进自己的代码。等它进 RC 再做正式接入。
 - 官方资料：[Material 3 in Compose](https://developer.android.com/develop/ui/compose/designsystems/material3)、[M3 Expressive](https://m3.material.io/blog/building-with-m3-expressive)。
 
 ### 响应式与大屏
@@ -117,11 +118,14 @@ Manifest 里接入的 Activity 名单，与成品门禁脚本的检查清单，�
 
 ## 动效与转场
 
-### 参照
+### 参照物
 
-- **以 Pixel 上的实际表现为参照**，不看第三方模仿品。有疑虑时先在参照设备上复现，再决定怎么实现。
-- 同一场景在同一台参照设备上对照，不要拿不同设备或不同 Launcher 的表现互相推断。
-- 参照应用正常而自己不正常，说明差距在自己这侧，不能归因给系统或桌面。
+- **以项目指定的样板应用为准**，不看第三方模仿品。参照物由项目约定，没指定就先问，不要自己选一个。
+- 本项目当前指定的参照是 `Pixel-Tailor-CN/PixelText`，其 [页面导航](https://github.com/Pixel-Tailor-CN/PixelText/blob/main/app/src/main/java/vip/mystery0/pixel/text/ui/AppNavigation.kt) 与 [主题](https://github.com/Pixel-Tailor-CN/PixelText/blob/main/app/src/main/java/vip/mystery0/pixel/text/ui/theme/Theme.kt) 是动效与主题的公开参考。
+- **参照源码，不只凭观感**。把观感差异定位到具体参数，否则会调成「有点像」。
+- **参照物是源码，不是依赖版本**。它的 `libs.versions.toml` 是另一回事，照搬版本号会把一堆预发布依赖一并引进来。看它怎么组织转场，不看它用什么版本。
+- 与参照物对照时，同一场景在同一台设备上比，不拿不同设备或不同 Launcher 的表现互相推断。参照应用正常而自己不正常，说明差距在自己这侧。
+- 核对自己看到的版本。公开主线可能已经领先于目标设备上安装的版本，不能把公开主线当作已安装版本的精确实现。
 
 ### 共享元素
 
@@ -134,6 +138,25 @@ Manifest 里接入的 Activity 名单，与成品门禁脚本的检查清单，�
 ### 不透明优先
 
 手势与转场路径上优先用不透明滑动与分层位移，不要叠加透明度。透明度动画在进度被停住时最容易暴露问题。
+
+前景完整位移、背景短距离位移、加轻微缩放与缓动，是参照物常用的组合。进入淡化较快、退出淡化延后，能避免手势中段两页同时发白。
+
+### 分清 spatial 与 effects
+
+M3 Expressive 把动效分成两类，命名与参数都按官方来，不要自创：
+
+- **spatial**：位置、尺寸、圆角这类形状变化。
+- **effects**：透明度、缩放这类不改变布局的效果。
+
+两类各有 fast、default、slow 三档速度。Expressive 已把旧的「缓动加时长」换成弹簧物理参数，官方预设即 `MotionScheme.expressive()` 与 `standard()`。
+
+依据：[Motion 概览](https://m3.material.io/styles/motion/overview/how-it-works)。
+
+### 统一动效时先分清层次
+
+- 不同层级的返回优先级不同：弹窗与底部面板要先于页面消费返回，否则会连页面一起退掉。
+- 保存、取消、返回栈与首次引导退出的语义保持不变。换动画不是改业务契约的理由。
+- 一次只统一一个范围，把不动的部分（如键盘、候选、手写等原生链）明确列出来。
 
 ### 帧率
 
@@ -158,5 +181,7 @@ Manifest 里接入的 Activity 名单，与成品门禁脚本的检查清单，�
 ## 来源
 
 - 平台行为变更、edge-to-edge、预测性返回、共享元素、Material 3 的 API 与版本号均来自 [Android Developers 官方文档](https://developer.android.com/)，2026-10-11 核对。
+- 动效参照物为 [Pixel-Tailor-CN/PixelText](https://github.com/Pixel-Tailor-CN/PixelText)，具体参考其页面导航与主题实现。
 - 预测性返回的手势进度转场、不透明分层、迁移名单单一定义点等做法，来自一个真实 Android 项目在 API 36 上的三轮返工记录。
 - 帧率请求 HIGH 类别、动画所有者统一管理的做法，来自该项目对原生动画链的帧间隔实测。
+- 参照物与依赖版本分开对待、不凭观感定位差异，来自该项目统一动效时的记录。

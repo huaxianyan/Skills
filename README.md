@@ -4,7 +4,7 @@
 
 ## 用法
 
-以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，三个技能会一起注册：
+以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，四个技能会一起注册：
 
 ```bash
 pi install git:github.com/huaxianyan/skills
@@ -63,7 +63,7 @@ git 源会用 HTTPS 克隆（`git:github.com/<owner>/<repo>` 会转成 `https://
 ```
 我要开发 <项目名>。先把这个仓库里的规范装到项目里：
 https://github.com/huaxianyan/skills
-装 chinese-tech-writing、project-conventions 和 release-notes-standard，放到本项目的 .pi/skills/ 下面。
+装 chinese-tech-writing、project-conventions、release-notes-standard 和 android-modern-standards，放到本项目的 .pi/skills/ 下面。
 ```
 
 Agent 会克隆仓库、挑出这几个技能、放进项目的技能目录。之后写文档、改注释、发版本就都按这套规范来。
@@ -106,6 +106,16 @@ GitHub Release 发布说明与页面的统一规范。
 
 自带门禁脚本 `verify_release_notes.py`，可以直接接到 CI 里，打标签时跑。
 另有 `references/retrofit-history.md`，讲清把历史 Release 追溯回现行标准的完整流程。
+
+### android-modern-standards
+
+Android 现代开发规范。三条主线：
+
+- **平台新特性**：目标 SDK 跟进最新稳定版。edge-to-edge 与预测性返回的接入做法，以及常见错误。
+- **界面**：优先用原生 Material 3 组件，不用自绘替代。动态取色。M3 Expressive 的 API 状态与 Alpha 边界。大屏自适应。
+- **动效**：以 Pixel 实际表现为参照。共享元素。不透明优先。高帧率请求的正确写法。
+
+版本号都标了核对日期，判据与做法不带日期。另讲清验证方式，包括静态门禁、回归用例与旧版本回测。
 
 ## 约定
 

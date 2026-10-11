@@ -4,7 +4,7 @@
 
 ## 用法
 
-以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，四个技能会一起注册：
+以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，五个技能会一起注册：
 
 ```bash
 pi install git:github.com/huaxianyan/skills
@@ -63,7 +63,7 @@ git 源会用 HTTPS 克隆（`git:github.com/<owner>/<repo>` 会转成 `https://
 ```
 我要开发 <项目名>。先把这个仓库里的规范装到项目里：
 https://github.com/huaxianyan/skills
-装 chinese-tech-writing、project-conventions、release-notes-standard 和 android-modern-standards，放到本项目的 .pi/skills/ 下面。
+装 chinese-tech-writing、project-conventions、release-notes-standard、android-modern-standards 和 experience-curation，放到本项目的 .pi/skills/ 下面。
 ```
 
 Agent 会克隆仓库、挑出这几个技能、放进项目的技能目录。之后写文档、改注释、发版本就都按这套规范来。
@@ -116,6 +116,21 @@ Android 现代开发规范。三条主线：
 - **动效**：以 Pixel 实际表现为参照。共享元素。不透明优先。高帧率请求的正确写法。
 
 版本号都标了核对日期，判据与做法不带日期。另讲清验证方式，包括静态门禁、回归用例与旧版本回测。
+
+### experience-curation
+
+开发经验整理的保守提议规则。任务完成、阶段验收或交接时，判断是否值得把经验补进规范或技能。
+
+候选必须已确认、可复用且边界明确，并有重复返工、用户明确的长期要求或已查清的高代价事故作为依据。每个任务最多主动提议一次，无合格候选就正常结束。优先更新已有技能，确认后才整理。
+
+如需主动启用，在工具常驻的规则文件中加入加载指引：
+
+```text
+开发任务完成、阶段验收或交接时，读取已安装的 experience-curation 技能并按其规则判断是否提议整理经验。
+技能不可用时正常结束，不临时编造替代规则。
+```
+
+技能安装本身不保证自动触发。这套方案依靠助手遵守提示词，没有后台扫描器或跨会话候选库。先试行约 10 个任务，再根据打扰程度和提议价值调整。
 
 ## 约定
 

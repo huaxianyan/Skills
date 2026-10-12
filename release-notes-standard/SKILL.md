@@ -105,20 +105,32 @@ Release 页面上只有 `release.apk` 或 `app-release.apk` 这类名字，读�
 - **项目名用仓库名或产品名**，不用构建产物的默认名。
 - **带架构**的包必须写清 ABI。多个 ABI 的产物不能重名。
 - **版本号与 Release 标签一致**，不带 `v` 前缀，方便与文件名、目录名拼接。
-- **校验文件用同名加 `.sha256` 后缀**，内容用 `sha256sum` 的默认格式 `SHA-256  <文件名>`。这样放同一目录即可直接 `sha256sum -c` 校验。
+- **校验文件用同名加 `.sha256` 后缀**，内容写 `SHA-256  <哈希>  <产物文件名>`。带上产物文件名，读者不用猜它对应哪个包，也便于人工比对。
+  - 它与 `sha256sum` 自己的输出格式不同：`sha256sum` 生成的行是 `<哈希>  <文件名>`，没有前置算法名，分隔符是空格加模式字符（`*` 为二进制、空格为文本）。
+  - **带 `SHA-256` 前缀的写法给 `sha256sum -c` 会报格式错误**，因为 `-c` 只接受本程序输出过的行。要兼顾两种工具就按生成格式写，两者都能读。
+  - 用别的语言生成时注意行尾：`sha256sum` 对 CRLF 敏感，文件名会带上 `\r` 导致找不到文件。校验文件保持 LF。
 
-在发布步骤里用 `#` 语法重命名，不改构建产物，也不复制文件：
+**资产名取自磁盘上的文件名**，`gh` 不会替你重命名。要在 Release 上得到规范名字，就得先让文件本身叫这个名字：
 
 ```bash
-gh release create "$TAG" \
-  "$APK_PATH#$RELEASE_APK_NAME" \
-  "$APK_PATH.sha256#$RELEASE_APK_NAME.sha256" \
-  --title "$TAG" --notes-file "$notes_out"
+mkdir -p dist
+cp "$APK_PATH" "dist/$RELEASE_APK_NAME"
+( cd dist && sha256sum "$RELEASE_APK_NAME" > "$RELEASE_APK_NAME.sha256" )
+gh release create "$TAG" dist/* --title "$TAG" --notes-file "$notes_out"
 ```
 
-`#` 左边是实际文件路径，右边是上传后的资产名。这样构建输出保持默认名，只有 Release 上的名字统一。
+`gh release create` 的 `#` 语法只是**显示标签**，不改变资产名：`'./a.zip#My label'` 上传后 `name` 仍是 `a.zip`，只是页面上多一行标签。拿它当重命名用会得到一个名字不对、多一个多余标签的产物。
 
-上传后核一下资产名与预期一致：
+如果构建环节本来就能控制输出名（例如 Gradle 的 `outputFileName`、`baseName` 配置），直接在那里命名，不必在发布步骤拷文件。
+
+注意区分两件事：
+
+- **资产名**（`name`）取自文件名，决定下载链接，也决定用户存到本地的名字。
+- **显示标签**（`label`）只是页面上的一行附加文字，`#` 设的就是它。
+
+只设 `#` 而不改文件名，得到的是一个名字仍然不规范、旁边多一行标签的产物。两者都想要规范时，先改文件名。
+
+上传后核对资产名与预期一致：
 
 ```bash
 gh release view "$TAG" --json assets -q '.assets[].name'
@@ -293,4 +305,4 @@ curl -sS -L -o app-release.apk \
 
 ## 来源
 
-这套规范在两个项目上跑通，门禁脚本从其中一个带发布流程的项目移植。产物命名与构建信息字段取自该项目一个 Android 应用的实践。
+这套规范在两个项目上跑通，门禁脚本从其中一个带发布流程的项目移植。产物命名与构建信息字段取自一个 Android 应用的实践。`gh` 的 `#` 只设置显示标签而不改资产名，这一点在 2026-10-12 按 `gh` 2.96.0 源码（`pkg/cmd/release/shared/upload.go` 里 `Name: fi.Name()`）核对。

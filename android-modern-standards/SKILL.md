@@ -1,6 +1,6 @@
 ---
 name: android-modern-standards
-description: Android 现代开发规范。目标 SDK 跟进最新稳定版、平台新特性尽量接入（预测性返回、edge-to-edge、大屏可调整性）、界面优先用原生 Material You 组件、动效参照指定的开源样板应用。新建或改造 Android 项目、提升 targetSdk、处理系统栏与返回手势、选界面组件、调转场动画时使用。触发语句：「升 targetSdk」「接入预测性返回」「支持 edge-to-edge」「Material You」「M3 Expressive」「这个转场不对」「动画不一致」「大屏适配」。
+description: Android 现代开发规范。目标 SDK 跟随主力设备的系统版本并跟进最新稳定版、平台新特性尽量接入（预测性返回、edge-to-edge、大屏可调整性）、界面优先用原生 Material You 组件、动效参照指定的开源样板应用。新建或改造 Android 项目、提升 targetSdk、处理系统栏与返回手势、选界面组件、调转场动画时使用。触发语句：「升 targetSdk」「手机升级了系统」「设备升到 Android 1x」「接入预测性返回」「支持 edge-to-edge」「Material You」「M3 Expressive」「这个转场不对」「动画不一致」「大屏适配」。
 ---
 
 # Android 现代开发规范
@@ -11,7 +11,7 @@ description: Android 现代开发规范。目标 SDK 跟进最新稳定版、平
 
 ## 总则
 
-- **目标 SDK 跟进最新稳定版**，不长期停在旧值。行为变更只在提升 `targetSdk` 后生效，停在旧值等于把兼容负担一直背下去。
+- **目标 SDK 跟随主力设备的系统版本**。设备升到大版本，就该把 `targetSdk` 提上去。行为变更只在提升 `targetSdk` 后生效，停在旧值等于把兼容负担一直背下去。
 - **新特性「尽量接入」的边界**：公开稳定 API 直接接入。实验性 API 可以先试，但要标注用途、隔离在可回退的分支，不当作长期基线。
 - **不靠记忆判断「什么是新的」**。写代码前核对官方的行为变更清单，链接见下文各节。
 - **能跑通的旧做法不等于还要继续用**。平台已经替你做了的事，不要自己再实现一套。
@@ -31,6 +31,35 @@ description: Android 现代开发规范。目标 SDK 跟进最新稳定版、平
 - 每年一个大版本，春季开发者预览与 Beta，年中正式发布。
 - QPR（季度平台版本）会加特性，不只是修 bug。Material 3 Expressive 就是随 Android 16 QPR1 铺开的。
 - 截至 2026-10，Android 17（API 37）已正式发布，Android 16（API 36）是上一版。
+
+### 节奏跟主力设备的系统版本
+
+- **自己的手机升级到大版本，就是提升 `targetSdk` 的时机**。不用等应用商店的下限提醒，也不要停在旧值观望。
+- 原因在验收方式：行为变更里总有几项只能靠真机判断，例如 ART 加载、native loader、按键音、内存上限、输入法可见性。设备没升级，就没有可验证的环境。设备一升级，「等待新版本真机环境」这个前置条件就解除了。
+- 应用商店对新应用和更新的 `targetSdk` 要求是**下限**，不是目标。达到下限不等于验证过新版行为。
+- 设备升级后先把适配调查做在前面：归集行为变更、对现有实现做静态审计、列出必须真机实测的项。调查阶段不改代码。
+
+### 提升的做法
+
+- **第一轮只提数字，不加猜测性兼容补丁**。先让新版行为自己暴露问题，再针对真实故障修。预先加补丁会掩盖真问题，事后也说不清补丁是否必要。
+- **一次提一级，或少量几级，每级留一个验收点**。跨度大时（例如从 target 26 追到 36）逐级推进，每级单独记录：这一级触发了什么问题、怎么修、真机结论是什么。一次跳多级会把归因混在一起，出问题时说不清是哪一级引入的。
+- **能编译、能启动不等于行为已验收**。行为变更只在 `targetSdk` 提升后生效，必须按级在真机上过一遍。
+- 每级的验收范围至少包含：应用能启动、主要流程可用、该级行为边界专项测试、核心功能回归。
+- **审计包用独立 `applicationId` 与可区分的显示名**，不覆盖正式包，也不接触正式包的用户数据。
+- 每一级的结论写进进度记录，并在进入下一级前取得用户确认。
+
+### 清单与代码里的取值
+
+- 比较 `targetSdkVersion` 这类数值时先解析再比较，**不要枚举已知取值**。枚举会在下次提升 target 时静默失效。
+- `targetSdk` 只写纯整数。API 37 起平台目录带了次版本号（`android-37.2`），但次版本号只能出现在编译侧。
+
+| 位置 | 写法 | 说明 |
+| --- | --- | --- |
+| 清单的 `targetSdkVersion` | `37` | 平台的 `attrs_manifest.xml` 里 `<uses-sdk>` 只定义整数属性 |
+| AGP 的 `compileSdk` | `37` | 常规写法 |
+| AGP 的 `compileSdkMinor` | `2` | 本机只有 `platforms/android-37.2`，不写次版本号 AGP 找不到平台 |
+
+设备侧报的次版本号与本机平台可能不一致（设备 `37.1`、平台 `37.2`），两者是不同构建分支，不影响上述写法。以上写法于 2026-10-12 按本机构件核对。
 
 ## Edge-to-Edge
 
@@ -121,7 +150,7 @@ Manifest 里接入的 Activity 名单，与成品门禁脚本的检查清单，�
 ### 参照物
 
 - **以项目指定的样板应用为准**，不看第三方模仿品。参照物由项目约定，没指定就先问，不要自己选一个。
-- 本项目当前指定的参照是 `Pixel-Tailor-CN/PixelText`，其 [页面导航](https://github.com/Pixel-Tailor-CN/PixelText/blob/main/app/src/main/java/vip/mystery0/pixel/text/ui/AppNavigation.kt) 与 [主题](https://github.com/Pixel-Tailor-CN/PixelText/blob/main/app/src/main/java/vip/mystery0/pixel/text/ui/theme/Theme.kt) 是动效与主题的公开参考。
+- 参照物要满足三个条件：开源可读源码、与项目同类场景、版本可核对。一个公开可用的例子是 `Pixel-Tailor-CN/PixelText`，其 [页面导航](https://github.com/Pixel-Tailor-CN/PixelText/blob/main/app/src/main/java/vip/mystery0/pixel/text/ui/AppNavigation.kt) 与 [主题](https://github.com/Pixel-Tailor-CN/PixelText/blob/main/app/src/main/java/vip/mystery0/pixel/text/ui/theme/Theme.kt) 是动效与主题的公开参考。它只是例子，不是默认值。
 - **参照源码，不只凭观感**。把观感差异定位到具体参数，否则会调成「有点像」。
 - **参照物是源码，不是依赖版本**。它的 `libs.versions.toml` 是另一回事，照搬版本号会把一堆预发布依赖一并引进来。看它怎么组织转场，不看它用什么版本。
 - 与参照物对照时，同一场景在同一台设备上比，不拿不同设备或不同 Launcher 的表现互相推断。参照应用正常而自己不正常，说明差距在自己这侧。
@@ -177,11 +206,13 @@ M3 Expressive 把动效分成两类，命名与参数都按官方来，不要自
 - 具体版本号、依赖坐标、设备与调试信息写进项目的 `AGENTS.md` 或构建文件，不写死在本规范里。
 - 本规范给判据与做法。涉及具体版本时以官方 release notes 为准，并把核对日期带上。
 - 项目已定下的技术选型优先于本规范的一般建议，冲突时以项目约定为准。
+- 发布流程、Release 页面形态与安装包命名见 `release-notes-standard` 技能，本规范不重复定义。
 
 ## 来源
 
 - 平台行为变更、edge-to-edge、预测性返回、共享元素、Material 3 的 API 与版本号均来自 [Android Developers 官方文档](https://developer.android.com/)，2026-10-11 核对。
-- 动效参照物为 [Pixel-Tailor-CN/PixelText](https://github.com/Pixel-Tailor-CN/PixelText)，具体参考其页面导航与主题实现。
+- 动效参照物例子为 [Pixel-Tailor-CN/PixelText](https://github.com/Pixel-Tailor-CN/PixelText)，具体参考其页面导航与主题实现。
 - 预测性返回的手势进度转场、不透明分层、迁移名单单一定义点等做法，来自一个真实 Android 项目在 API 36 上的三轮返工记录。
+- 以主力设备系统升级为提升 `targetSdk` 的节奏、第一轮只提数字、逐级验收与归因，来自该项目从 target 26 到 37 的分阶段现代化记录，2026-10-12 核对。
 - 帧率请求 HIGH 类别、动画所有者统一管理的做法，来自该项目对原生动画链的帧间隔实测。
 - 参照物与依赖版本分开对待、不凭观感定位差异，来自该项目统一动效时的记录。

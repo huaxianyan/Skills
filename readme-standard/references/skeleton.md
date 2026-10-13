@@ -21,10 +21,12 @@
 
 <有可视界面才保留。整组图若需要语境，先写一句概括。>
 
-| | |
-| --- | --- |
-| ![<画面一>](docs/images/<一>.png) | ![<画面二>](docs/images/<二>.png) |
-| ![<画面三>](docs/images/<三>.png) | ![<画面四>](docs/images/<四>.png) |
+<img src="docs/images/<一>.png" width="270" alt="<画面一>">
+<img src="docs/images/<二>.png" width="270" alt="<画面二>">
+<img src="docs/images/<三>.png" width="270" alt="<画面三>">
+<img src="docs/images/<四>.png" width="270" alt="<画面四>">
+
+连续写、不空行分隔；同一组同一个 width，直接排列，不进表格、不逐图配说明。
 
 ## 特性（可选）
 

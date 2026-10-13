@@ -8,7 +8,7 @@
 
 ## 用法
 
-以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，五个技能会一起注册：
+以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，六个技能会一起注册：
 
 ```bash
 pi install git:github.com/huaxianyan/skills
@@ -23,7 +23,7 @@ pi install git:github.com/huaxianyan/skills
 
 ```bash
 git clone https://github.com/huaxianyan/skills.git
-cp -r skills/chinese-tech-writing skills/project-conventions skills/release-notes-standard ~/.pi/agent/skills/
+cp -r skills/chinese-tech-writing skills/readme-standard skills/project-conventions skills/release-notes-standard ~/.pi/agent/skills/
 ```
 
 只装到某个项目，不影响其他项目：
@@ -67,12 +67,20 @@ git 源会用 HTTPS 克隆（`git:github.com/<owner>/<repo>` 会转成 `https://
 ```
 我要开发 <项目名>。先把这个仓库里的规范装到项目里：
 https://github.com/huaxianyan/skills
-装 chinese-tech-writing、project-conventions、release-notes-standard、android-modern-standards 和 experience-curation，放到本项目的 .pi/skills/ 下面。
+装 chinese-tech-writing、readme-standard、project-conventions、release-notes-standard、android-modern-standards 和 experience-curation，放到本项目的 .pi/skills/ 下面。
 ```
 
 Agent 会克隆仓库、挑出这几个技能、放进项目的技能目录。之后写文档、改注释、发版本就都按这套规范来。
 
 ## 包含的技能
+
+### readme-standard
+
+README 撰写标准，管仓库门面的结构与边界。
+
+九节顺序：图标与标题、定位语、截图、特性（可选）、快速开始、使用与配置、设计与实现（可选）、文档、许可证。可省略，不乱序。另定内容边界：进度与过程性内容链到项目文档，README 不放会过时的动态。截图区一到四张两栏排列，不逐图配说明。
+
+自带 `references/skeleton.md` 骨架模板，写新 README 从那里复制。README 里的句子与排版仍按 chinese-tech-writing。
 
 ### project-conventions
 

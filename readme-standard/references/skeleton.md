@@ -21,12 +21,14 @@
 
 <有可视界面才保留。整组图若需要语境，先写一句概括。>
 
-<img src="docs/images/<一>.png" width="270" alt="<画面一>">
-<img src="docs/images/<二>.png" width="270" alt="<画面二>">
-<img src="docs/images/<三>.png" width="270" alt="<画面三>">
-<img src="docs/images/<四>.png" width="270" alt="<画面四>">
+<p align="center">
+  <img src="docs/images/<一>.png" width="32%" alt="<画面一>">
+  <img src="docs/images/<二>.png" width="32%" alt="<画面二>">
+  <img src="docs/images/<三>.png" width="32%" alt="<画面三>">
+  <img src="docs/images/<四>.png" width="32%" alt="<画面四>">
+</p>
 
-连续写、不空行分隔；同一组同一个 width，直接排列，不进表格、不逐图配说明。
+包在一个 `p align="center"` 里连续写，img 之间不空行；宽度统一用百分比不用定长。不进表格、不逐图配说明。
 
 ## 特性（可选）
 

@@ -155,3 +155,13 @@ MIT（`LICENSE`）。句子、段落、排版规则整理自阮一峰的《中�
 - 就地修正的失效记录：`machine/AGENTS.md` 原写 `ANDROID_SDK_ROOT` 与 `ANDROID_HOME` 都指向 `android-clt`，实际前者为空；拼音项目约定原写 AVD 与系统镜像在 `E:/dev/android-avd` 与 `E:/dev/android-system-images`，本机两者都不存在且没有任何 avd 目录。三处重复的「不得在项目目录复制 JDK/SDK」表述合并进共用工具规则，`machine/AGENTS.md` 98 行仍在预算内。
 - 验证边界：只改文档，未装任何工具，未执行 `scoop cleanup` 或 `scoop cache rm`，未跑任何项目构建。环境结论以注册表查询与实际路径解析为准，不依赖旧会话的进程变量。
 - 下一步：用户确认后回收 Scoop 旧版本与安装包缓存，预计释放 2～3 GB；非 Scoop 工具尚无统一归属（magpie 在下载目录），待收敛。
+
+## 十二、2026-10-15：magpie 收敛到共用工具目录，删掉 CLI 版
+
+- 当前主线：把 magpie 从下载目录移到共用工具位置，删除不用的 CLI 版，修正开始菜单快捷方式。
+- 处置结果：`E:\下载\magpie-cli-windows-amd64.exe`（约 48 MB）删除；`magpie-windows-amd64.exe` 移到 `E:\Dev\Tools\magpie\`；开始菜单 `Magpie.lnk` 的 TargetPath 与 WorkingDirectory 同步改为新路径。注册表 Run 键、计划任务、桌面快捷方式均无引用。
+- 已验证：监听 3425 的就是桌面版（PID 18580），被删的 CLI 版未在运行。同盘改名在运行中完成，进程未中断，端口仍 LISTENING，`/v1/models` 返回 200。移动是改名不是复制，字节未变。
+- 定下的去向：非 Scoop 工具统一放 `E:\Dev\Tools\<工具>\`。Scoop 旧版本与安装包缓存（约 2～3 GB）用户决定暂不回收，空间够用。
+- 记录同步：`machine/AGENTS.md` 的 magpie 条目改为记录新位置并注明 CLI 版已删除，原条目按 `magpie model context` 与 `magpie model output` 写的配置入口已不存在。
+- 验证边界：未做端到端模型调用验证，未重启 magpie。桌面版能否配置模型上下文与输出上限未核实，原 CLI 子命令的替代入口待用户确认。
+- 下一步：下次重启 magpie 时确认从新路径启动正常。

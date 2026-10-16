@@ -165,3 +165,13 @@ MIT（`LICENSE`）。句子、段落、排版规则整理自阮一峰的《中�
 - 记录同步：`machine/AGENTS.md` 的 magpie 条目改为记录新位置并注明 CLI 版已删除，原条目按 `magpie model context` 与 `magpie model output` 写的配置入口已不存在。
 - 验证边界：未做端到端模型调用验证，未重启 magpie。桌面版能否配置模型上下文与输出上限未核实，原 CLI 子命令的替代入口待用户确认。
 - 下一步：下次重启 magpie 时确认从新路径启动正常。
+
+## 十三、2026-10-16：排查 GLM 压缩报错，确认与配置无关
+
+- 现象：使用 `opencode-zen-free/glm-5.3-flash-free` 时压缩报 `429 rate_limit_error`，`OpenCode Zen Free: Upstream request failed: Endpoint is unavailable.`
+- 排查手段：直接向本机 magpie 网关（`127.0.0.1:3425`）发对照请求，不依赖 Pi 会话。关键对照是**把请求缩小到 16 token**，同样报同一个错，因此与压缩、与请求体量、与会话亲和头都无关。
+- 结论：故障在 GLM 免费端点侧，按时间聚簇出现。实测同一天内先 2/2 失败，再 6/10 成功，最后 15/15 成功；同规模 `deepseek-v4.1-flash-free` 请求正常。故障窗口内端点极慢：340 token 请求 67 秒，13k token 请求 224 秒，另有超时；失败是快速拒绝（约 10 秒返回 429），不是超时。
+- 为什么压缩最先出问题：压缩是一次投出整段会话（触发点 180k），并且要求很长的输出（摘要 `maxTokens` 是 `0.8 × reserveTokens`，即 16000）；失败后 Pi 那次恢复只覆盖上下文溢出与提前 length 结束，不管 429，所以用户直接看到报错。
+- 顺带查实：压缩只能用当前会话模型。`compaction.modelOverrides` 只接受 `reserveTokens` 与 `keepRecentTokens` 两个 token 字段，没有换模型的写法，做不到聊天与压缩用不同模型。
+- 验证边界：未改变任何配置，未验证 Pi 层压缩重试次数。免费端点的稳定性属服务侧状态，不写成机器约定，只用测量值记录。
+- 下一步：免费端点出故障窗口时手工 `/compact` 重试，或改用更健康的模型；不再作为配置问题重复排查。

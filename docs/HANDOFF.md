@@ -175,3 +175,11 @@ MIT（`LICENSE`）。句子、段落、排版规则整理自阮一峰的《中�
 - 顺带查实：压缩只能用当前会话模型。`compaction.modelOverrides` 只接受 `reserveTokens` 与 `keepRecentTokens` 两个 token 字段，没有换模型的写法，做不到聊天与压缩用不同模型。
 - 验证边界：未改变任何配置，未验证 Pi 层压缩重试次数。免费端点的稳定性属服务侧状态，不写成机器约定，只用测量值记录。
 - 下一步：免费端点出故障窗口时手工 `/compact` 重试，或改用更健康的模型；不再作为配置问题重复排查。
+
+## 十四、2026-10-16：临时下调 oneapi/gpt-6.1-sol 的上下文（待恢复）
+
+- 改动：`~/.pi/agent/models.json` 里 `oneapi` 的 `gpt-6.1-sol`，`contextWindow` 由 `1050000` 改为 `372000`，与该 provider 另外三个模型一致。**原值 `1050000`，用户要求临时生效，需恢复时改回去。**
+- 副作用：压缩触发点由 914000（87%）变为 236000（63%），因为全局 `reserveTokens` 136000 不变。想要更晚触发就补一条 `oneapi/gpt-6.1-sol` 的 `reserveTokens`。
+- 为什么可以直改：`oneapi` 与 `v2ex` 两个 provider 块不在 magpie 的管理范围，与 `models.json.before-magpie` 备份逐字节一致，magpie 接入或断开时不会覆盖。
+- 验证边界：只改 `models.json` 并校验 JSON 可解析，未重启 Pi、未实际对该模型发起请求。生效需 `/reload`。
+- 下一步：用户确认临时状态结束后恢复原值，或改成带 `reserveTokens` 覆盖的长期方案。

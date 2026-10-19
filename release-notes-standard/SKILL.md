@@ -120,16 +120,19 @@ cp "$APK_PATH" "dist/$RELEASE_APK_NAME"
 gh release create "$TAG" dist/* --title "$TAG" --notes-file "$notes_out"
 ```
 
-`gh release create` 的 `#` 语法只是**显示标签**，不改变资产名：`'./a.zip#My label'` 上传后 `name` 仍是 `a.zip`，只是页面上多一行标签。拿它当重命名用会得到一个名字不对、多一个多余标签的产物。
-
 如果构建环节本来就能控制输出名（例如 Gradle 的 `outputFileName`、`baseName` 配置），直接在那里命名，不必在发布步骤拷文件。
 
-注意区分两件事：
+**不要给发布资产设显示标签。** `gh release create` 的 `#` 语法设的是标签，不是资产名：`'./a.zip#My label'` 上传后 `name` 仍是 `a.zip`。而页面上展示资产用的是标签，文件名退到次一级位置。同一个项目每个版本都标成「Android APK」，Release 页面上就看不出哪个文件是哪个版本，读者下载到本地还得自己改名。文件名已经写清了项目和版本，标签没有存在的理由。
 
 - **资产名**（`name`）取自文件名，决定下载链接，也决定用户存到本地的名字。
-- **显示标签**（`label`）只是页面上的一行附加文字，`#` 设的就是它。
+- **显示标签**（`label`）是页面上盖在文件名之上的文字，`#` 设的就是它。只为改名而设标签，得到的是文件名仍然不规范、页面上还盖着一层标签的产物，两者都想要规范就先改文件名。
 
-只设 `#` 而不改文件名，得到的是一个名字仍然不规范、旁边多一行标签的产物。两者都想要规范时，先改文件名。
+`gh release create <tag> dist/*` 不带 `#` 就不会产生标签。存量发布上已有的标签这样清掉，并顺手核对：
+
+```bash
+gh api -X PATCH repos/<owner>/<repo>/releases/assets/<asset_id> -f label=
+gh release view <tag> --json assets -q '.assets[] | "\(.name)\t\(.label // "")"'
+```
 
 上传后核对资产名与预期一致：
 
@@ -269,6 +272,8 @@ gh release view vX.Y.Z --json tagName,name,assets \
 
 - 每个资产的大小与 `gh release view --json assets` 报的一致。
 - 资产名符合上面的产物命名规则：项目名与版本号齐全，只有 ASCII 字符；有多个 ABI 变体时架构段齐全且互不重名。
+- 资产没有显示标签，页面上显示的就是版本化的文件名：
+  `gh release view <tag> --json assets -q '.assets[] | "\(.name)\t\(.label // "")"'` 每一行末尾都应为空。
 - 正文的 `## 构建信息` 表里，架构、min / target SDK、包名、签名证书都与实际包一致。
 - 下载后实测 SHA-256 与 `SHA256SUMS` 逐字节一致。
 - 签名证书与上一版一致。**不一致就停下来问**，因为这决定老用户能否覆盖安装。
@@ -306,4 +311,4 @@ curl -sS -L -o app-release.apk \
 
 ## 来源
 
-这套规范在两个项目上跑通，门禁脚本从其中一个带发布流程的项目移植。产物命名与构建信息字段取自一个 Android 应用的实践。`gh` 的 `#` 只设置显示标签而不改资产名，这一点在 2026-10-12 按 `gh` 2.96.0 源码（`pkg/cmd/release/shared/upload.go` 里 `Name: fi.Name()`）核对。
+这套规范在两个项目上跑通，门禁脚本从其中一个带发布流程的项目移植。产物命名与构建信息字段取自一个 Android 应用的实践。`gh` 的 `#` 只设置显示标签而不改资产名，这一点在 2026-10-12 按 `gh` 2.96.0 源码（`pkg/cmd/release/shared/upload.go` 里 `Name: fi.Name()`）核对；页面上用它展示资产、盖住文件名这一点在 2026-10-19 按五个历史 Release 的 `label` 字段与实际显示对照确认。

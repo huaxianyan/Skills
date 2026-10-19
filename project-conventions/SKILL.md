@@ -1,6 +1,6 @@
 ---
 name: project-conventions
-description: 项目级开发规范：凭据与 SSH 私钥的使用底线、项目 AGENTS.md 该记什么、开发进度文档（入库、跨工具通用的交接记忆）的写法与交接清单、任务预期与超时纪律、测试临时产物的清理、开发中间产物的留存回收与工具环境的共用基线。新建或接手项目、整理或更新 AGENTS.md、建立进度记录、把工作交给另一个 Agent 或人、准备跑一条耗时命令、在设备上调试产生临时文件、解包或反编译产生大量中间文件、装工具或搭环境时使用。触发语句：「接手这个项目」「用私钥连 SSH」「凭据放在哪」「把这条写进 AGENTS.md」「记录一下这轮的结论」「看看进度文档」「交接给下一个 agent」「这个要跑多久」「清理现场」「别留垃圾」「目录堆满了」「磁盘要满了」「这个 work 目录能删吗」「装个 JDK」「配环境」「机器上有这个工具吗」。
+description: 项目级开发规范：凭据与 SSH 私钥的使用底线、GitHub 访问优先走 SSH、项目 AGENTS.md 该记什么、开发进度文档（入库、跨工具通用的交接记忆）的写法与交接清单、任务预期与超时纪律、测试临时产物的清理、开发中间产物的留存回收与工具环境的共用基线。新建或接手项目、整理或更新 AGENTS.md、建立进度记录、把工作交给另一个 Agent 或人、准备跑一条耗时命令、在设备上调试产生临时文件、解包或反编译产生大量中间文件、装工具或搭环境、连 GitHub 时使用。触发语句：「接手这个项目」「用私钥连 SSH」「连 github 用 ssh 还是 gh」「clone 这个仓库」「凭据放在哪」「把这条写进 AGENTS.md」「记录一下这轮的结论」「看看进度文档」「交接给下一个 agent」「这个要跑多久」「清理现场」「别留垃圾」「目录堆满了」「磁盘要满了」「这个 work 目录能删吗」「装个 JDK」「配环境」「机器上有这个工具吗」。
 ---
 
 # 项目开发规范与交接
@@ -37,6 +37,26 @@ git remote -v
 ```
 
 私钥口令由用户本人输入。不代填、不写进脚本、不放进环境变量文件，也不让 `ssh` 之外的工具接触它。
+
+### GitHub 与远端访问走 SSH
+
+连 GitHub 的仓库操作（`git clone`、`fetch`、`pull`、`push`、推标签）一律用 `git` 加 SSH 远端 `git@github.com:<owner>/<repo>.git`。要访问 GitHub 不等于要 token：私钥已经在 `~/.ssh` 里，让它生效就行，不要回头问用户要凭据，也不要重新生成密钥或改用 HTTPS。
+
+私钥放在 `~/.ssh` 下的默认文件名（`id_rsa`、`id_ed25519`）。要区分多个身份时在 `~/.ssh/config` 里用 `IdentityFile` 指定；不把密钥挪到项目目录，不放 `.env`，不写进脚本。
+
+`gh` 留给只有 API 才能做的事：读写 Release 与资产、Actions 运行与日志、Secrets、PR 与 Issue、跨仓库查询。它通常已是登录状态（系统 keyring），不必再让用户登录一次。
+
+接手已有仓库先看远端用的是哪种协议，不是 SSH 就改一次：
+
+```bash
+# 期望输出 git@github.com:<owner>/<repo>.git
+git remote get-url origin
+git remote set-url origin git@github.com:<owner>/<repo>.git
+# 返回 Hi <账号>! You've successfully authenticated 即通；该命令退出码为 1，属正常
+ssh -o BatchMode=yes -o ConnectTimeout=5 -T git@github.com
+```
+
+这个检查只发连接，不碰密钥。上一节的读取禁令照旧：私钥只让 `ssh` 与 `git` 自己读。
 
 ### 其他凭据同理
 

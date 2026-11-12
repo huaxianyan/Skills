@@ -8,7 +8,7 @@
 
 ## 用法
 
-以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，六个技能会一起注册：
+以 Pi 为例。Pi 可以直接装，仓库带了 `pi` 清单，七个技能会一起注册：
 
 ```bash
 pi install git:github.com/huaxianyan/skills
@@ -23,7 +23,7 @@ pi install git:github.com/huaxianyan/skills
 
 ```bash
 git clone https://github.com/huaxianyan/skills.git
-cp -r skills/chinese-tech-writing skills/readme-standard skills/project-conventions skills/release-notes-standard ~/.pi/agent/skills/
+cp -r skills/chinese-tech-writing skills/readme-standard skills/project-conventions skills/release-notes-standard skills/android-modern-standards skills/experience-curation skills/ui-copy ~/.pi/agent/skills/
 ```
 
 只装到某个项目，不影响其他项目：
@@ -73,6 +73,16 @@ https://github.com/huaxianyan/skills
 Agent 会克隆仓库、挑出这几个技能、放进项目的技能目录。之后写文档、改注释、发版本就都按这套规范来。
 
 ## 包含的技能
+
+### ui-copy
+
+界面文案与信息层级规范。管的是「这句话要不要存在」，不是「这句话怎么写」。
+
+判据只有一条：删掉它，第一次用的人会怎样。仍然知道点哪里、会发生什么就删，要猜或看不出后果就留。在此之上定了几条硬要求：优先用结构与视觉层级表达，默认不加 slogan、教学段落和逐区块的帮助小字，补充信息走 info 图标加 tooltip。
+
+清爽优先不能牺牲可访问性：表单标签与可访问名称必须留，占位符不算标签，纯图标按钮要有替代文本。危险与不可逆操作（删除、支付、提交永久性变更）必须保留后果提示，这是「清爽」的例外。
+
+重写已有界面的顺序是固定的：先删文字，清晰度没下降就收手，下降了再改布局，最后才改措辞。验收标准是没用过的人不看文档能走通。与 `chinese-tech-writing`、`android-modern-standards`、`readme-standard` 的分工写在技能里。
 
 ### readme-standard
 

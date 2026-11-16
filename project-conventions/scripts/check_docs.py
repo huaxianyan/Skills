@@ -286,6 +286,8 @@ def check_release_manual(repo: Path) -> None:
 
 
 def check_local_paths(repo: Path) -> None:
+    if not (repo / ".git").exists():
+        return  # 纯本地目录，没有公开暴露面
     docs = repo / "docs"
     if not docs.is_dir():
         return

@@ -218,6 +218,11 @@ ls <项目目录>/docs/handoff/ 2>/dev/null      # 有没有进度记录
 | 归档的旧进度 | `docs/archive/STATUS-<起始>_<截止>.md` | 只读；往归档里追加即违规 |
 | 面向外部 | `README.md` | 定位、安装、用法 |
 
+**没有仓库的项目同样照这张表建。** 本机目录里也建 `docs/`，只是不进版本控制；这样以后决定上仓库时整棵目录搬过去即可，不用重新组织。两点区别要记住：
+
+- 没有 `.git` 的目录不存在公开暴露面，`check_docs.py` 会跳过 `no-local-path`。
+- 这类项目的持久化只有私有档案仓库里的 `AGENTS.md` 一份。所以**换设备后必须知道的事实**（凭据位置、设备语义、关键决定）仍写在 `AGENTS.md`，进度流水才放本地 `docs/`；真要长期保存，正解是给它建一个私有仓库。
+
 `docs/` 根目录只放上面这些固定文件。新写的研究文档先落到 `docs/research/`，不要平铺进 `docs/`——平铺过一次就会一直平铺。
 
 **归档与交接是两件事，不要混用同一个目录**：
@@ -271,7 +276,7 @@ ls <项目目录>/docs/handoff/ 2>/dev/null      # 有没有进度记录
   python <skills>/project-conventions/scripts/check_docs.py <项目目录> [...]     --archive-repo <私有档案仓库>
   ```
 
-  检查项 id（可用 `.docscheck.json` 的 `skip` 关掉单项）：`status-exists`（STATUS.md 或 handoff 流水至少有一个）、`status-header`（「当前主线」必须在第一条条目之前）、`status-budget`（500 行 / 30 条）、`status-numbering`（唯一、单一方案）、`status-order`（方向一致）、`archive-name` 与 `archive-index`、`handoff-mix`（归档文件混进 handoff）、`release-notes`、`docs-root`（`docs/` 根平铺超过 5 个非标准文件才报）、`release-manual`、`no-local-path`（`docs/` 里出现本机路径）、`agents-budget`、`agents-copy`（与归档副本 diff）。
+  检查项 id（可用 `.docscheck.json` 的 `skip` 关掉单项）：`status-exists`（STATUS.md 或 handoff 流水至少有一个）、`status-header`（「当前主线」必须在第一条条目之前）、`status-budget`（500 行 / 30 条）、`status-numbering`（唯一、单一方案）、`status-order`（方向一致）、`archive-name` 与 `archive-index`、`handoff-mix`（归档文件混进 handoff）、`release-notes`、`docs-root`（`docs/` 根平铺超过 5 个非标准文件才报）、`release-manual`、`no-local-path`（`docs/` 里出现本机路径，只对有 `.git` 的目录生效）、`agents-budget`、`agents-copy`（与归档副本 diff）。
 
   目录里没有 `docs/` 的仓库会被直接跳过，可以直接把一批目录丢进去。脚本只报不改：涉及内容判断的（怎么切归档、哪些文件算研究文档）留给人决定。
 

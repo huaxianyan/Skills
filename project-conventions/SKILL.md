@@ -89,13 +89,13 @@ git diff --cached | grep -nE 'BEGIN [A-Z ]*PRIVATE KEY|ghp_|github_pat_|xox[bapr
 跨项目档案放在一份私有仓库里，本机路径记在本机 Pi 的通用指引中。查的顺序固定：
 
 1. **项目索引**：按 GitHub 仓库名定位，保留大小写。本地目录名可能与仓库名不同，别拿目录名当身份。
-2. **该项目的私有约定**：`projects/<仓库名>/AGENTS.md`，记着这台机器上该项目的路径、凭据位置、设备语义与历史踩坑。
+2. **该项目的私有约定**：`projects/<仓库名>/AGENTS.md`（没有公开仓库的看 `local/<项目>/`），记着这台机器上该项目的路径、凭据位置、设备语义与历史踩坑。
 3. **本机与工作区基线**：记的是跨项目成立的配置与工具现状。
 4. **仓库内的进度与决策**：`docs/handoff/` 的最新条目、长期决策文件，以及 `docs/STATUS.md` 这类常驻头。
 
 ```bash
 grep -n "<仓库名>" <档案仓库>/PROJECTS.md    # 定位映射
-ls <档案仓库>/projects/<仓库名>/             # 有没有私有约定
+ls <档案仓库>/projects/<仓库名>/ <档案仓库>/local/<项目>/   # 有没有私有约定
 ls <项目目录>/docs/handoff/ 2>/dev/null      # 有没有进度记录
 ```
 

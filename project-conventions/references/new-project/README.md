@@ -8,7 +8,7 @@ cp -r <skills>/project-conventions/references/new-project/. <新仓库>/
 
 要改的只有四处：
 
-1. 根目录 `AGENTS.md`：填仓库身份、本地路径、构建命令、写入边界，控制在 100 行内。
+1. 根目录 `AGENTS.md`：把 `AGENTS.md.tmpl` 改名为 `AGENTS.md` 再填仓库身份、本地路径、构建命令、写入边界，控制在 100 行内。后缀是 `.tmpl` 的原因：magpie 安装技能时会跳过名叫 `AGENTS.md` 的文件，直接叫这个名字装完就丢了。
 2. `docs/STATUS.md`：填四个「当前主线」小节，没内容就写「未开始」。
 3. `RELEASE.md`：填发布前置、版本号位置与产物命名。
 4. `docs/research/.gitkeep` 这份可删，等真写了研究文档再建。

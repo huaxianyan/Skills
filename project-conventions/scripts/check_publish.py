@@ -72,8 +72,8 @@ RULES = [
     ),
     (
         "Windows 绝对路径",
-        re.compile(r"\b[A-Z]:[\\/](?:Users|Neko7ina|Dev|Syncthing)\b|%APPDATA%|%LOCALAPPDATA%"),
-        "本机路径，换成相对路径或 <数据目录>",
+        re.compile(r"\b[A-Z]:[\\/](?:Users|Neko7ina|Dev|Syncthing)\b"),
+        "本机绝对路径，换成相对路径或 <数据目录>（%APPDATA% 这类环境变量与机器无关，不报）",
     ),
     (
         "SSH 或凭据",

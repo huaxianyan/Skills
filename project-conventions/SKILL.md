@@ -276,7 +276,7 @@ ls <项目目录>/docs/handoff/ 2>/dev/null      # 有没有进度记录
   python <skills>/project-conventions/scripts/check_docs.py <项目目录> [...]     --archive-repo <私有档案仓库>
   ```
 
-  检查项 id（可用 `.docscheck.json` 的 `skip` 关掉单项）：`status-exists`（STATUS.md 或 handoff 流水至少有一个）、`status-header`（「当前主线」必须在第一条条目之前）、`status-budget`（500 行 / 30 条）、`status-numbering`（唯一、单一方案）、`status-order`（方向一致）、`archive-name` 与 `archive-index`、`handoff-mix`（归档文件混进 handoff）、`release-notes`、`docs-root`（`docs/` 根平铺超过 5 个非标准文件才报）、`release-manual`、`no-local-path`（`docs/` 里出现本机路径，只对有 `.git` 的目录生效）、`agents-budget`、`agents-copy`（与归档副本 diff）。
+  检查项 id（可用 `.docscheck.json` 的 `skip` 关掉单项）：`status-exists`（STATUS.md 或 handoff 流水至少有一个）、`status-header`（「当前主线」必须在第一条条目之前）、`status-budget`（500 行 / 30 条）、`status-numbering`（唯一、单一方案）、`status-order`（方向一致）、`archive-name` 与 `archive-index`、`handoff-mix`（归档文件混进 handoff）、`release-notes`、`docs-root`（`docs/` 根平铺超过 5 个非标准文件才报）、`release-manual`、`no-local-path`（`docs/` 里出现本机路径，只对配了远端的仓库生效）、`agents-budget`、`agents-copy`（与归档副本 diff）。
 
   目录里没有 `docs/` 的仓库会被直接跳过，可以直接把一批目录丢进去。脚本只报不改：涉及内容判断的（怎么切归档、哪些文件算研究文档）留给人决定。
 

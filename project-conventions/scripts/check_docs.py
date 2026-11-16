@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -288,6 +289,10 @@ def check_release_manual(repo: Path) -> None:
 def check_local_paths(repo: Path) -> None:
     if not (repo / ".git").exists():
         return  # 纯本地目录，没有公开暴露面
+    if not subprocess.run(
+        ["git", "-C", str(repo), "remote"], capture_output=True, text=True
+    ).stdout.strip():
+        return  # 有仓库但没有远端，同样不对外
     docs = repo / "docs"
     if not docs.is_dir():
         return

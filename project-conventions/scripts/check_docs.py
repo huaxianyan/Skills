@@ -322,19 +322,49 @@ def check_agents(repo: Path, cfg: dict) -> None:
     archive_repo = cfg.get("archive_repo")
     if not archive_repo:
         return
-    copy = Path(archive_repo) / "projects" / repo.name / "AGENTS.md"
+    archive = Path(archive_repo)
+    copy = archive / "projects" / repo.name / "AGENTS.md"
+    local_home = archive / "local" / repo.name
     if not copy.is_file():
-        report.add(
-            repo.name,
-            "agents-copy",
-            f"归档仓库没有 projects/{repo.name}/AGENTS.md，按双副本规则应存在",
-        )
-        return
+        copy = local_home / "AGENTS.md"
+        if not copy.is_file():
+            report.add(
+                repo.name,
+                "agents-copy",
+                f"归档仓库里既没有 projects/{repo.name}/AGENTS.md，"
+                f"也没有 local/{repo.name}/AGENTS.md，按双副本规则应有一份",
+            )
+            return
     if read(agents) != read(copy):
         report.add(
             repo.name,
             "agents-copy",
-            "本地 AGENTS.md 与归档副本不一致，按「内容更多更新的为准」对齐后两边都推",
+            f"本地 AGENTS.md 与归档副本 {copy.parent.name}/{copy.parent.parent.name} 不一致，"
+            "按「内容更多更新的为准」对齐后两边都推",
+        )
+        return
+    if copy.parent.parent.name != "local":
+        return
+    # local/ 形态还要求把 docs/ 一起镜像，否则换设备只剩约定
+    here_docs = repo / "docs"
+    there_docs = local_home / "docs"
+    if not here_docs.is_dir():
+        return
+    if not there_docs.is_dir():
+        report.add(
+            repo.name,
+            "agents-copy",
+            f"归档仓库 local/{repo.name}/ 缺 docs/，本机项目的进度要一起镜像",
+        )
+        return
+    names = {p.name for p in here_docs.rglob("*") if p.is_file()}
+    others = {p.name for p in there_docs.rglob("*") if p.is_file()}
+    if names - others:
+        report.add(
+            repo.name,
+            "agents-copy",
+            f"归档仓库 local/{repo.name}/docs/ 缺 {len(names - others)} 个文件："
+            + "、".join(sorted(names - others)[:4]),
         )
 
 

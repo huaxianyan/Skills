@@ -387,7 +387,12 @@ def main(argv: list[str]) -> int:
         for name, run in CHECKS.items():
             if name in skip:
                 continue
+            before = len(report.items)
             run(repo, cfg)
+            if skip:
+                report.items[before:] = [
+                    item for item in report.items[before:] if item[1] not in skip
+                ]
 
     report.dump()
     return 1 if report.has_problems() else 0
